@@ -1,3 +1,5 @@
+import config from './config.js';
+
 function refreshWeather(response) {
   let temperatureElement = document.querySelector("#temperature");
   let cityElement = document.querySelector("#city");
@@ -11,7 +13,9 @@ function refreshWeather(response) {
   descriptionElement.innerHTML = response.data.condition.description;
   humidityElement.innerHTML = `${response.data.temperature.humidity}%`;
   windSpeedElement.innerHTML = `${response.data.wind.speed}km/h`;
-  temperatureElement.innerHTML = Math.round(temperature);
+  timeElement.innerHTML = formatDate(new Date(response.data.time * 1000));
+  // temperatureElement.innerHTML = Math.round(temperature);
+  temperatureElement.innerHTML = Math.round(response.data.temperature.current);
   iconElement.innerHTML = `<img src="${response.data.condition.icon_url}" class="weather-app-icon" />`;
 
   getTimeFromAmdoren("New York", response.data.city, new Date().toISOString());
@@ -23,9 +27,11 @@ function refreshWeather(response) {
   );
 }
 function getTimeFromAmdoren(fromLocation, toLocation, time) {
-  const apiKey = "q5CXMd35C4C37dP6tkezYFgBWQ5nE6";
-  const apiUrl = `https://www.amdoren.com/api/time.php?api_key=${apiKey}&from=${fromLocation}&time=${time}&to=${toLocation}`;
-  fetch(apiUrl)
+  // const timeApiUrl = `${config.TIME_API_URL}from=${fromLocation}&time=${time}&to=${toLocation}`;
+  // const timeApiUrl = `${config.TIME_API_URL}loc=${location}`;
+  const timeApiUrl = `${config.TIME_API_URL}?api_key=${config.TIME_API_KEY}&from=${fromLocation}&time=${time}&to=${toLocation}`;
+  console.log("Time API URL:", timeApiUrl);
+  fetch(timeApiUrl)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Failed to fetch time data");
@@ -69,8 +75,7 @@ function formatDate(date) {
 }
 
 function searchCity(city) {
-  let apiKey = "b2a5adcct04b33178913oc335f405433";
-  let apiUrl = `https://api.shecodes.io/weather/v1/current?query=${city}&key=${apiKey}`;
+  let apiUrl = `${config.WEATHER_API_URL}?key=${config.WEATHER_API_KEY}&query=${city}`;
   axios.get(apiUrl).then(refreshWeather);
 }
 function handleSearchSubmit(event) {
